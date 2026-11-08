@@ -1,0 +1,18 @@
+# Credenziali Oracle
+.oci/
+*.pem
+*.key
+config
+oci_config
+
+# Ambiente Python
+.venv/
+__pycache__/
+*.pyc
+
+# Test
+.pytest_cache/
+
+# File sensibili
+.env
+*.secret
