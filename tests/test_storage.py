@@ -1,5 +1,5 @@
 from unittest.mock import patch, Mock #libreria python per simulare Oracle
-from storage import carica_file, lista_file
+from storage import carica_file, lista_file, scarica_file
 import oci
 
                             # tmp_path cartella temporanea
@@ -10,18 +10,23 @@ def test_carica_file_successo(tmp_path):
     risposta = Mock() # simula un oggetto
     risposta.status = 200
 
-    with patch("storage.object_storage.put_object", return_value=risposta):
+    client_mock = Mock()
+    client_mock.put_object.return_value = risposta
+
+    with patch("storage.crea_client_storage", return_value=client_mock):
         risultato = carica_file(percorso_file)
-    assert risultato == 200
+        assert risultato == 200
 
 
 def test_carica_file_non_trovato(tmp_path):
     percorso_file = tmp_path / "inesistente.txt"
+    
+    client_mock = Mock()
 
-    with patch("storage.object_storage.put_object") as mock_upload:
+    with patch("storage.crea_client_storage", return_value=client_mock):
         risultato = carica_file(percorso_file)
     assert risultato is None
-    mock_upload.assert_not_called() #caricamento mai avviato
+    client_mock.put_object.assert_not_called() #caricamento mai avviato
 
 
 def test_carica_file_errore_oracle(tmp_path):
@@ -35,7 +40,10 @@ def test_carica_file_errore_oracle(tmp_path):
         message="Errore simulato"
     )
 
-    with patch("storage.object_storage.put_object", side_effect=errore):
+    client_mock = Mock()
+    client_mock.put_object.side_effect = errore
+
+    with patch("storage.crea_client_storage", return_value=client_mock):
         risultato = carica_file(percorso_file)
     assert risultato is None
 
@@ -44,9 +52,13 @@ def test_lista_file_bucket_vuoto():
     risposta = Mock()
     risposta.data.objects = []
 
-    with patch("storage.object_storage.list_objects", return_value=risposta):
+    client_mock = Mock()
+    client_mock.list_objects.return_value = risposta
+
+    with patch("storage.crea_client_storage", return_value=client_mock):
         risultato = lista_file()
     assert risultato == []
+
 
 def test_lista_file_contenuto():
     oggetto1 = Mock()
@@ -58,11 +70,14 @@ def test_lista_file_contenuto():
     risposta = Mock()
     risposta.data.objects = [oggetto1, oggetto2]
 
-    with patch("storage.object_storage.list_objects", return_value=risposta):
+    client_mock = Mock()
+    client_mock.list_objects.return_value = risposta
+
+    with patch("storage.crea_client_storage", return_value=client_mock):
         risultato = lista_file()
     assert risultato == ["documento.txt", "foto.png"]
 
-from storage import carica_file, lista_file, scarica_file
+
 
 
 def test_scarica_file_successo(tmp_path):
