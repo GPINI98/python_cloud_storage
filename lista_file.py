@@ -1,19 +1,11 @@
-import oci
+from storage import lista_file
 
-config = oci.config.from_file()
+risultato = lista_file()
 
-object_storage = oci.object_storage.ObjectStorageClient(config)
-
-namespace = "axme5c5goo9t"
-bucket = "gpini-python-cloud-storage"
-
-risultato = object_storage.list_objects(
-    namespace_name=namespace,
-    bucket_name=bucket
-)
-
-if risultato.data.objects:
-    for oggetto in risultato.data.objects:
-        print(oggetto.name)
+if risultato is None:
+    print("Impossibile recuperare i file.")
+elif risultato:
+    for nome in risultato:
+        print(nome)
 else:
     print("Il bucket è vuoto.")

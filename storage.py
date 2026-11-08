@@ -27,3 +27,22 @@ def carica_file(percorso_file):
     except oci.exceptions.ServiceError as errore: #as errore assegna l'errore alla variabile errore
         print("Errore Oracle:", errore.message) #errore restituito da Oracle
         return None
+
+def lista_file():
+    try:
+        risultato = object_storage.list_objects(
+            namespace_name=NAMESPACE,
+            bucket_name=BUCKET
+        )
+
+        oggetti = risultato.data.objects
+        nomi_file = []
+
+        for oggetto in oggetti:
+            nomi_file.append(oggetto.name)
+
+        return nomi_file
+
+    except oci.exceptions.ServiceError as errore:
+        print("Errore Oracle:", errore.message)
+        return None
