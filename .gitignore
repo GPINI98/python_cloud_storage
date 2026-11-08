@@ -16,3 +16,6 @@ __pycache__/
 # File sensibili
 .env
 *.secret
+
+# Istruzioni
+istruzioni_sviluppo.txt
