@@ -46,3 +46,26 @@ def lista_file():
     except oci.exceptions.ServiceError as errore:
         print("Errore Oracle:", errore.message)
         return None
+
+def scarica_file(nome_file, percorso_destinazione):
+    try:
+        risultato = object_storage.get_object( #richiesta
+            namespace_name=NAMESPACE,
+            bucket_name=BUCKET,
+            object_name=nome_file,
+        )
+    
+        with open(percorso_destinazione, "wb") as file: 
+            file.write(risultato.data.content) #scrittura dati
+
+        return risultato.status
+
+    except FileNotFoundError: #errore se il file non esiste
+        return None
+
+    except oci.exceptions.ServiceError as errore: 
+        if errore.status == 404:
+            print("Oggetto non trovato su Oracle.")
+        else:
+            print("Errore Oracle:", errore.message)
+        return None
