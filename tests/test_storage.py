@@ -87,7 +87,10 @@ def test_scarica_file_successo(tmp_path):
     risposta.status = 200
     risposta.data.content = b"Contenuto di prova"#b perchè il contenuto è binario
 
-    with patch("storage.object_storage.get_object", return_value=risposta):
+    client_mock = Mock()
+    client_mock.get_object.return_value = risposta
+
+    with patch("storage.crea_client_storage", return_value=client_mock):
         risultato = scarica_file("documento.txt", percorso_destinazione)
     assert risultato == 200
     assert percorso_destinazione.read_bytes() == b"Contenuto di prova"
@@ -103,7 +106,11 @@ def test_scarica_file_non_trovato(tmp_path):
         message="Oggetto non trovato"
     )
 
-    with patch("storage.object_storage.get_object", side_effect=errore):
+    client_mock = Mock()
+    client_mock.get_object.side_effect = errore
+
+
+    with patch("storage.crea_client_storage", return_value=client_mock):
         risultato = scarica_file("inesistente.txt", percorso_destinazione)
     assert risultato is None
     assert not percorso_destinazione.exists()
@@ -116,6 +123,9 @@ def test_scarica_file_destinazione_non_valida(tmp_path):
     risposta.status = 200
     risposta.data.content = b"Contenuto di prova"
 
-    with patch("storage.object_storage.get_object", return_value=risposta):
+    client_mock = Mock()
+    client_mock.get_object.return_value = risposta
+    
+    with patch("storage.crea_client_storage", return_value=client_mock):
         risultato = scarica_file("documento.txt", percorso_destinazione)
     assert risultato is None

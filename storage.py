@@ -52,7 +52,8 @@ def lista_file():
 
 def scarica_file(nome_file, percorso_destinazione):
     try:
-        risultato = object_storage.get_object( #richiesta
+        client = crea_client_storage()
+        risultato = client.get_object( #richiesta
             namespace_name=NAMESPACE,
             bucket_name=BUCKET,
             object_name=nome_file,
