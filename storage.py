@@ -1,9 +1,10 @@
 import oci
 from pathlib import Path
 
-config = oci.config.from_file()
-#crea il client
-object_storage = oci.object_storage.ObjectStorageClient(config)
+#lazy initialization
+def crea_client_storage():
+    config = oci.config.from_file()
+    return oci.object_storage.ObjectStorageClient(config)
 
 NAMESPACE = "axme5c5goo9t"
 BUCKET = "gpini-python-cloud-storage"
@@ -12,8 +13,9 @@ def carica_file(percorso_file):
     nome_file = Path(percorso_file).name #estrae solo il nome esaminando il percorso
 
     try:
+        client = crea_client_storage()
         with open(percorso_file, "rb") as file:
-            risultato = object_storage.put_object(
+            risultato = client.put_object(
                 namespace_name=NAMESPACE,
                 bucket_name=BUCKET,
                 object_name=nome_file,
@@ -30,7 +32,8 @@ def carica_file(percorso_file):
 
 def lista_file():
     try:
-        risultato = object_storage.list_objects(
+        client = crea_client_storage()
+        risultato = client.list_objects(
             namespace_name=NAMESPACE,
             bucket_name=BUCKET
         )
@@ -49,7 +52,8 @@ def lista_file():
 
 def scarica_file(nome_file, percorso_destinazione):
     try:
-        risultato = object_storage.get_object( #richiesta
+        client = crea_client_storage()
+        risultato = client.get_object( #richiesta
             namespace_name=NAMESPACE,
             bucket_name=BUCKET,
             object_name=nome_file,
